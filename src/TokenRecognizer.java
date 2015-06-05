@@ -310,7 +310,7 @@ public class TokenRecognizer {
                                 }
                                 if (LargestMatch.length() < Temp.length()) LargestMatch = Temp; /** We want largest match */
 
-                                /** When we get the largest match then we move our string position Fin  = start + FinalMax*/
+                                /** When we get the largest match then we move our string position to start + FinalMax*/
                                 if(FinalMax<LargestMatch.length()) {
                                     FinalMax = LargestMatch.length();
                                     fin = start+FinalMax;
