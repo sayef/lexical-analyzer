@@ -17,8 +17,9 @@ That's all about algorithm.
     given string matches any regular expression
 5. Initiall we handled only two characters 'a' and 'b', but you can convert it easily for any characters 
     (see comments to understand easily)
-###Example strings as input (not regular expressions; regular expressions are given in input.l; offcourse you can also change/add/remove for further checking):
 
+
+###Example strings as input (not regular expressions; regular expressions are given in input.l; offcourse you can also change/add/remove for further checking):
 1. aab
 2. abab
 3. aabbb
