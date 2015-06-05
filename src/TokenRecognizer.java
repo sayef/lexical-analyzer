@@ -299,7 +299,7 @@ public class TokenRecognizer {
                             String LargestMatch = new String();
                             int TokenNum = 0;
                             //System.out.print(start + " ");
-                            for (int k = 0; k < nRegEx; k++) {      /** We are trying to match with every DFA*/
+                            for (int k = 0; k < nRegEx; k++) {     /** We are trying to match with every DFA*/
 
                                 String Temp = isAcceped(k, string[i].substring(start));
                                // System.out.println(k + " " + start + " " + Temp);
@@ -310,6 +310,7 @@ public class TokenRecognizer {
                                 }
                                 if (LargestMatch.length() < Temp.length()) LargestMatch = Temp; /** We want largest match */
 
+                                /** When we get the largest match then we move our string position Fin  = start + FinalMax*/
                                 if(FinalMax<LargestMatch.length()) {
                                     FinalMax = LargestMatch.length();
                                     fin = start+FinalMax;
