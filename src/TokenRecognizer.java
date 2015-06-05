@@ -16,23 +16,27 @@ import java.util.*;
 public class TokenRecognizer {
 
     public static final Integer MAX = 100;
-    public static final Character Epsilon = 'e';
-    public static boolean[][] isFinalState = new boolean[MAX][MAX];
-    public static Integer[][][] DFA = new Integer[MAX][MAX][MAX];
-    public static Integer[] NState = new Integer[MAX];
-    public static boolean ErrorDetected = false;
+    public static final Character Epsilon = 'e';    //defining epsilon as 'e'
+    public static boolean[][] isFinalState = new boolean[MAX][MAX]; //chechikg for final state
+    public static Integer[][][] DFA = new Integer[MAX][MAX][MAX]; //DFA table
+    public static Integer[] NState = new Integer[MAX]; //
+    public static boolean ErrorDetected = false; //Error detection for any unknown characters
 
 
     private static void DesignDFA(Integer nRegEx, String Postfix){
 
-
+    /**
+        Arrays and sets for storing nullable, firstpos, lastpos, followpos
+    */
         Boolean[] Nullable = new Boolean[MAX];
         Set<Integer>[] FirstPos = new Set[MAX];
         Set<Integer>[] LastPos = new Set[MAX];
         Set<Integer>[] FollowPos = new Set[MAX];
 
         Map<Character, Integer> map = new HashMap<Character, Integer>(); //MAP FOR POSITIONING THE TERMINALS
-
+    /**
+        Defining all types of operator that we will use, and distinguish which of them are unary and which them are binary
+    */
         List<Character> allOperators = Arrays.asList('|', '?', '+', '*', '.');
         List<Character> unaryOperators = Arrays.asList('*', '?', '+');
         List<Character> binaryOperators = Arrays.asList('|', '.');
@@ -45,7 +49,7 @@ public class TokenRecognizer {
 
             Character c = Postfix.charAt(i);
 
-            /** Calculationg c1 and c2 */
+            /** Calculating c1 and c2 */
 
             if (!allOperators.contains(c))
                 stack.push(i);
@@ -178,7 +182,7 @@ public class TokenRecognizer {
 
             }
 
-
+            /** Finding the state is Final or not*/
             for(int i: set){
                 if(i == Postfix.length()-2) isFinalState[nRegEx][Top] = true;
             }
@@ -202,6 +206,7 @@ public class TokenRecognizer {
 
     }
 
+    /** Funcion for any subsequence is accepted by the DFA or not */
     public static String  isAcceped(int nRegEx, String string){
         int currentState = 1;
 
@@ -240,20 +245,20 @@ public class TokenRecognizer {
         return LargestPossibleToken;
     }
 
-
+    /** Main driver function */
     public static void main(String[] args){
 
 
         String[] RegEx = new String[MAX];
         String[] string = new String[MAX];
 
-        int nRegEx=0;
+        int nRegEx=0;   /** Number of regular expressions that will be read from input.l file*/
 
 
             FileReader FR;
             BufferedReader BR;
         try {
-                FR = new FileReader("H:\\Intellij workspace\\src\\input.l");
+                FR = new FileReader("H:\\Intellij workspace\\src\\input.l"); /** Change the directory for your path/to/input.l */
                 BR = new BufferedReader(FR);
 
 
@@ -266,10 +271,10 @@ public class TokenRecognizer {
 
 
 
-        RegExConverter Postfix = new RegExConverter();
+        RegExConverter Postfix = new RegExConverter();      /** Object of RegExConverter class */
         for( int i=0; i<nRegEx; i++) {
 
-            String str = Postfix.infixToPostfix(RegEx[i]);
+            String str = Postfix.infixToPostfix(RegEx[i]); /** converted string of infix to postfix */
             str = str.replace("?", "e|");
             str += "$.";
             System.out.println("Postfix of Token " + (i+1) + ": " + RegEx[i] + " is " + str);
@@ -280,21 +285,21 @@ public class TokenRecognizer {
         int  nString=1;
         Scanner scanIn = new Scanner(System.in);
         while(scanIn.hasNext()) {
-                    string[0] = scanIn.nextLine();
+                    string[0] = scanIn.nextLine();      /** Now take input from console to match with regular expression*/
                     int NotMatched = 0;
                     for (int i = 0; i < nString; i++) {
 
                         int start = 0;
 
                         while(start < string[i].length()) {
-                            //System.out.println("hete");
+                            //System.out.println("here");
                             int fin = 0;
                             int FinalMax = -1;
                             String LargestStr = "";
                             String LargestMatch = new String();
                             int TokenNum = 0;
                             //System.out.print(start + " ");
-                            for (int k = 0; k < nRegEx; k++) {
+                            for (int k = 0; k < nRegEx; k++) {      /** We are trying to match with every DFA*/
 
                                 String Temp = isAcceped(k, string[i].substring(start));
                                // System.out.println(k + " " + start + " " + Temp);
@@ -303,7 +308,7 @@ public class TokenRecognizer {
                                     System.out.println("An Error Detected: " + string[i].substring(start) + " is Unrecognized!");
                                     start++;
                                 }
-                                if (LargestMatch.length() < Temp.length()) LargestMatch = Temp;
+                                if (LargestMatch.length() < Temp.length()) LargestMatch = Temp; /** We want largest match */
 
                                 if(FinalMax<LargestMatch.length()) {
                                     FinalMax = LargestMatch.length();
