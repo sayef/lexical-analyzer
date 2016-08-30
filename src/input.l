@@ -1,3 +1,8 @@
+[a-b]?at
+ab*c?
+Ab+Cd+
+a?
+(ab*)|c
 abb
 (a*|b*)*abba
 (a*|b+)a

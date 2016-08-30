@@ -16,22 +16,27 @@ import java.util.*;
 public class TokenRecognizer {
 
     public static final Integer MAX = 100;
-    public static final Character Epsilon = 'e';    //defining epsilon as 'e'
+    public static final char EPSILON = 'ε';    //defining EPSILON as 'ε'
     public static boolean[][] isFinalState = new boolean[MAX][MAX]; //chechikg for final state
     public static Integer[][][] DFA = new Integer[MAX][MAX][MAX]; //DFA table
-    public static Integer[] NState = new Integer[MAX]; //
-    public static boolean ErrorDetected = false; //Error detection for any unknown characters
+    public static Integer[] nState = new Integer[MAX]; //
+    public static boolean errorDetected = false; //Error detection for any unknown characters
+    public static final char CHARACTERS[] = {   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                                                'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                                                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                                                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                                                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'
+                                            }; //character set for rules and string
 
-
-    private static void DesignDFA(Integer nRegEx, String Postfix){
+    private static void DesignDFA(Integer nRegEx, String postfix){
 
     /**
-        Arrays and sets for storing nullable, firstpos, lastpos, followpos
+        Arrays and sets for storing nullable, firstPos, lastPos, followPos
     */
-        Boolean[] Nullable = new Boolean[MAX];
-        Set<Integer>[] FirstPos = new Set[MAX];
-        Set<Integer>[] LastPos = new Set[MAX];
-        Set<Integer>[] FollowPos = new Set[MAX];
+        Boolean[] nullable = new Boolean[MAX];
+        Set<Integer>[] firstPos = new Set[MAX];
+        Set<Integer>[] lastPos = new Set[MAX];
+        Set<Integer>[] followPos = new Set[MAX];
 
         Map<Character, Integer> map = new HashMap<Character, Integer>(); //MAP FOR POSITIONING THE TERMINALS
     /**
@@ -45,9 +50,9 @@ public class TokenRecognizer {
 
         Stack < Integer > stack = new  Stack();
 
-        for(int i=0;i<Postfix.length();i++) {
+        for(int i=0;i<postfix.length();i++) {
 
-            Character c = Postfix.charAt(i);
+            Character c = postfix.charAt(i);
 
             /** Calculating c1 and c2 */
 
@@ -62,129 +67,127 @@ public class TokenRecognizer {
                 }
                 stack.push(i);
             }
-            /**  Nullable Calulation */
-            if (c == Epsilon) Nullable[i] = true;
-            else if (c == '*') Nullable[i] = true;
-            else if (c == '+') Nullable[i] = Nullable[iC];
-            else if (c == '?') Nullable[i] = true;
-            else if (!allOperators.contains(c)) Nullable[i] = false;
-            else if (c == '|') Nullable[i] = (Nullable[iC1] || Nullable[iC2]);
-            else if (c == '.') Nullable[i] = Nullable[iC1] && Nullable[iC2];
+            /**  nullable Calulation */
+            if (c == EPSILON) nullable[i] = true;
+            else if (c == '*') nullable[i] = true;
+            else if (c == '+') nullable[i] = nullable[iC];
+            else if (c == '?') nullable[i] = true;
+            else if (!allOperators.contains(c)) nullable[i] = false;
+            else if (c == '|') nullable[i] = (nullable[iC1] || nullable[iC2]);
+            else if (c == '.') nullable[i] = nullable[iC1] && nullable[iC2];
 
-            /** FirstPos and LastPos Calculation */
+            /** firstPos and lastPos Calculation */
 
-            FirstPos[i] = new HashSet<Integer>();
-            LastPos[i] = new HashSet<Integer>();
-            FollowPos[i] = new HashSet<Integer>();
+            firstPos[i] = new HashSet<Integer>();
+            lastPos[i] = new HashSet<Integer>();
+            followPos[i] = new HashSet<Integer>();
 
             if (!allOperators.contains(c)) {
-                FirstPos[i].add(i);
-                LastPos[i].add(i);
+                firstPos[i].add(i);
+                lastPos[i].add(i);
             } else if (c == '|') {
-                FirstPos[i].addAll(FirstPos[iC1]);
-                FirstPos[i].addAll(FirstPos[iC2]);
+                firstPos[i].addAll(firstPos[iC1]);
+                firstPos[i].addAll(firstPos[iC2]);
 
-                LastPos[i].addAll(LastPos[iC2]);
-                LastPos[i].addAll(LastPos[iC1]);
+                lastPos[i].addAll(lastPos[iC2]);
+                lastPos[i].addAll(lastPos[iC1]);
 
             } else if (c == '.') {
 
-                if (Nullable[iC1]) {
-                    FirstPos[i].addAll(FirstPos[iC2]);
-                    FirstPos[i].addAll((FirstPos[iC1]));
+                if (nullable[iC1]) {
+                    firstPos[i].addAll(firstPos[iC2]);
+                    firstPos[i].addAll((firstPos[iC1]));
                 } else
-                    FirstPos[i].addAll(FirstPos[iC1]);
+                    firstPos[i].addAll(firstPos[iC1]);
 
-                if (Nullable[iC2]) {
-                    LastPos[i].addAll(LastPos[iC2]);
-                    LastPos[i].addAll(LastPos[iC1]);
+                if (nullable[iC2]) {
+                    lastPos[i].addAll(lastPos[iC2]);
+                    lastPos[i].addAll(lastPos[iC1]);
                 } else
-                    LastPos[i].addAll(LastPos[iC2]);
+                    lastPos[i].addAll(lastPos[iC2]);
             } else if (c == '*' || c == '+' || c == '?') {
-                FirstPos[i] = FirstPos[iC];
-                LastPos[i] = LastPos[iC];
+                firstPos[i] = firstPos[iC];
+                lastPos[i] = lastPos[iC];
             }
 
-            /** FollowPos Calculation */
+            /** followPos Calculation */
 
             if (c == '.') {
 
-                for (int j : LastPos[iC1]) {
+                for (int j : lastPos[iC1]) {
                     //System.out.println(". " + j);
-                    FollowPos[j].addAll(FirstPos[iC2]);
+                    followPos[j].addAll(firstPos[iC2]);
                 }
             }
             else if (c == '*' || c == '+') {
 
-                for (int j : LastPos[i]) {
+                for (int j : lastPos[i]) {
                     //System.out.println("* "+j);
-                    FollowPos[j].addAll(FirstPos[i]);
+                    followPos[j].addAll(firstPos[i]);
                 }
 
             }
 
         }
 
-/*
+        /*
         for(int i=0; i<Postfix.length();i++){
             System.out.print(Postfix.charAt(i) + " : ");
-            for(int j: FollowPos[i]){
+            for(int j: followPos[i]){
                 System.out.print(j + " ");
             }
             System.out.println("");
         }
-*/
-        /** Making DFA from FollowPos */
-        char[] Letters = new char[2];
-        Letters[0] = 'a'; Letters[1] = 'b';
+        */
+        /** Making DFA from followPos */
 
-        Map <Set<Integer>, Integer> MapOfSetToInt = new HashMap< Set<Integer>, Integer>();
-        Map <Integer, Set<Integer>> MapOfIntToSet = new HashMap< Integer, Set<Integer>>();
+        Map <Set<Integer>, Integer> mapOfSetToInt = new HashMap< Set<Integer>, Integer>();
+        Map <Integer, Set<Integer>> mapOfIntToSet = new HashMap< Integer, Set<Integer>>();
         Queue<Integer> queue = new LinkedList<Integer>();
 
 
 
-        NState[nRegEx] = 1;
-        MapOfSetToInt.put(FirstPos[Postfix.length() - 1], NState[nRegEx]);
-        MapOfIntToSet.put(NState[nRegEx], FirstPos[Postfix.length() - 1]);
-        queue.add(NState[nRegEx]);
-        NState[nRegEx]++;
+        nState[nRegEx] = 1;
+        mapOfSetToInt.put(firstPos[postfix.length() - 1], nState[nRegEx]);
+        mapOfIntToSet.put(nState[nRegEx], firstPos[postfix.length() - 1]);
+        queue.add(nState[nRegEx]);
+        nState[nRegEx]++;
 
         while(!queue.isEmpty()){
             Set <Integer> set = new HashSet<>();
-            Integer Top = queue.remove();
-            set.addAll(MapOfIntToSet.get(Top));
+            Integer top = queue.remove();
+            set.addAll(mapOfIntToSet.get(top));
             //System.out.print(set + " ");
 
 
-            for(int i=0; i<2; i++){
+            for(int i=0; i<CHARACTERS.length; i++){
 
-                Set <Integer> TranSet= new HashSet<>();
+                Set <Integer> tranSet= new HashSet<>();
                 for(int j : set){
-                    if( Letters[i] == Postfix.charAt(j)) {
-                        TranSet.addAll(FollowPos[j]);
+                    if( CHARACTERS[i] == postfix.charAt(j)) {
+                        tranSet.addAll(followPos[j]);
                     }
                 }
-                if(TranSet.isEmpty()) continue;
+                if(tranSet.isEmpty()) continue;
 
-                if(MapOfSetToInt.get(TranSet)==null){
+                if(mapOfSetToInt.get(tranSet)==null){
 
-                    DFA[nRegEx][MapOfSetToInt.get(set)][i] = NState[nRegEx];
-                    MapOfSetToInt.put(TranSet,NState[nRegEx]);
-                    MapOfIntToSet.put(NState[nRegEx],TranSet);
-                    queue.add(NState[nRegEx]);
-                    NState[nRegEx]++;
+                    DFA[nRegEx][mapOfSetToInt.get(set)][i] = nState[nRegEx];
+                    mapOfSetToInt.put(tranSet,nState[nRegEx]);
+                    mapOfIntToSet.put(nState[nRegEx],tranSet);
+                    queue.add(nState[nRegEx]);
+                    nState[nRegEx]++;
                 }
                 else{
 
-                    DFA[nRegEx][MapOfSetToInt.get(set)][i] = MapOfSetToInt.get(TranSet);
+                    DFA[nRegEx][mapOfSetToInt.get(set)][i] = mapOfSetToInt.get(tranSet);
                 }
 
             }
 
             /** Finding the state is Final or not*/
             for(int i: set){
-                if(i == Postfix.length()-2) isFinalState[nRegEx][Top] = true;
+                if(i == postfix.length()-2) isFinalState[nRegEx][top] = true;
             }
 
         }
@@ -192,64 +195,131 @@ public class TokenRecognizer {
 
 
         /** Printing DFA table*/
-/*
-        for(int i = 1; i<NState[nRegEx];i++) {
+        /*
+        for(int i = 1; i<nState[nRegEx];i++) {
             System.out.println(i + ": " + DFA[nRegEx][i][0] + " " + DFA[nRegEx][i][1]);
         }
 
-        for(int i = 1; i<NState[nRegEx];i++) {
+        for(int i = 1; i<nState[nRegEx];i++) {
             if(isFinalState[nRegEx][i]==true)
                 System.out.println("Final: " + i);
         }
-*/
-
-
+        */
     }
 
     /** Funcion for any subsequence is accepted by the DFA or not */
     public static String  isAcceped(int nRegEx, String string){
         int currentState = 1;
 
-        String PossibleToken = new String();
-        String LargestPossibleToken = new  String();
+        String possibleToken = new String();
+        String largestPossibleToken = new  String();
 
 
         //System.out.println(string);
+
+        boolean foundEndPoint = false;
+
         for(int i=0; i<string.length();i++){
 
             //System.out.println(currentState);
-            PossibleToken+=string.charAt(i);
-            if(string.charAt(i)=='a') {
-                if(DFA[nRegEx][currentState][0]==null ){
+            possibleToken+=string.charAt(i);
+            boolean letterFound = false;
+
+            for(int j=0; j<CHARACTERS.length; j++) {
+
+                if (string.charAt(i) == CHARACTERS[j]) {
+                    if (DFA[nRegEx][currentState][j] == null) {
+                        foundEndPoint = true;
+                        break;
+                    }
+                    currentState = DFA[nRegEx][currentState][j];
+                    letterFound = true;
                     break;
                 }
-                currentState = DFA[nRegEx][currentState][0];
-
             }
 
-            else if(string.charAt(i)=='b') {
-                if(DFA[nRegEx][currentState][1]==null ){
-                    break;
-                }
-                currentState = DFA[nRegEx][currentState][1];
+            if(foundEndPoint)
+                break;
+
+            if(!letterFound) {
+                errorDetected = true;
+                return largestPossibleToken;
             }
-            else {
-                ErrorDetected = true;
-                return LargestPossibleToken;
-            }
-            if(isFinalState[nRegEx][currentState]==true) LargestPossibleToken = PossibleToken;
+            if(isFinalState[nRegEx][currentState]==true) largestPossibleToken = possibleToken;
 
         }
 
-       // System.out.println(LargestPossibleToken);
-        return LargestPossibleToken;
+        //System.out.println(largestPossibleToken);
+        return largestPossibleToken;
+    }
+
+
+    /*
+    *Returns true if there exist a left square bracket from the position pos
+    * */
+    public static boolean findLeftSquare(String regex, int pos){
+        for(int i=pos; i>=0; i--){
+            if(regex.charAt(i)==']') return false;
+            if(regex.charAt(i)=='[') return true;
+        }
+        return false;
+    }
+    /*
+    *Returns true if there exist a right square bracket from the position pos
+    * */
+    public static boolean findRightSquare(String regex, int pos){
+        for(int i=pos; i<regex.length(); i++){
+            if(regex.charAt(i)=='[') return false;
+            if(regex.charAt(i)==']') return true;
+        }
+        return false;
+    }
+
+    /*
+    *Processes Ranges i.e. [A-EXYZ] will be converted to (A|B|C|D|E|X|Y|Z)
+    * */
+    public static String processRange(String regex){
+        String temp;
+        for(int i=0; i<regex.length(); i++){
+            if(regex.charAt(i)=='-'){
+                if(i>1 && i<regex.length()-1 && (int)regex.charAt(i-1)<(int)regex.charAt(i+1) && findLeftSquare(regex, i) && findRightSquare(regex, i)){
+                    temp = "";
+                    for(int j=(int)regex.charAt(i-1); j<=(int)regex.charAt(i+1); j++) {
+                        temp += (char)j;
+                    }
+                    regex = regex.substring(0, i-1) + temp + regex.substring(i+2, regex.length());
+                }else{
+                    return null;
+                }
+            }
+        }
+
+        boolean started = false;
+        String ret = "";
+        for(int i=0; i<regex.length(); i++){
+
+            if(regex.charAt(i)=='['){
+                ret+='(';
+                started = true;
+            }else if(started==true && regex.charAt(i)!=']' && regex.charAt(i)!='['){
+                ret+=regex.charAt(i);
+                if(i+1<regex.length() && regex.charAt(i+1)!=']')
+                    ret+='|';
+            }else if(started==true && regex.charAt(i)==']'){
+                ret+=')';
+                started = false;
+            }else
+                ret+=regex.charAt(i);
+        }
+        System.out.println(ret);
+        return ret;
     }
 
     /** Main driver function */
     public static void main(String[] args){
 
 
-        String[] RegEx = new String[MAX];
+        String[] regEx = new String[MAX];
         String[] string = new String[MAX];
 
         int nRegEx=0;   /** Number of regular expressions that will be read from input.l file*/
@@ -258,11 +328,16 @@ public class TokenRecognizer {
             FileReader FR;
             BufferedReader BR;
         try {
-                FR = new FileReader("H:\\Intellij workspace\\src\\input.l"); /** Change the directory for your path/to/input.l */
+                FR = new FileReader("/home/sayef/dev/GithubProjects/LexicalAnalyzer/src/input.l"); /** Change the directory for your path/to/input.l */
                 BR = new BufferedReader(FR);
 
 
-            while( (RegEx[nRegEx] = BR.readLine())!=null ){
+            while( (regEx[nRegEx] = BR.readLine())!=null ){
+                try {
+                    regEx[nRegEx] = processRange(regEx[nRegEx]);
+                }catch (Exception e){
+                    System.out.println("Format not recognized!");
+                }
                 nRegEx++;
             }
             BR.close();
@@ -274,10 +349,10 @@ public class TokenRecognizer {
         RegExConverter Postfix = new RegExConverter();      /** Object of RegExConverter class */
         for( int i=0; i<nRegEx; i++) {
 
-            String str = Postfix.infixToPostfix(RegEx[i]); /** converted string of infix to postfix */
-            str = str.replace("?", "e|");
+            String str = Postfix.infixToPostfix(regEx[i]); /** converted string of infix to postfix */
+            str = str.replace("?", EPSILON+"|");
             str += "$.";
-            System.out.println("Postfix of Token " + (i+1) + ": " + RegEx[i] + " is " + str);
+            System.out.println("Postfix of Token " + (i+1) + ": " + regEx[i] + " is " + str);
             DesignDFA(i, str);
         }
 
@@ -286,7 +361,7 @@ public class TokenRecognizer {
         Scanner scanIn = new Scanner(System.in);
         while(scanIn.hasNext()) {
                     string[0] = scanIn.nextLine();      /** Now take input from console to match with regular expression*/
-                    int NotMatched = 0;
+                    int notMatched = 0;
                     for (int i = 0; i < nString; i++) {
 
                         int start = 0;
@@ -294,40 +369,42 @@ public class TokenRecognizer {
                         while(start < string[i].length()) {
                             //System.out.println("here");
                             int fin = 0;
-                            int FinalMax = -1;
-                            String LargestStr = "";
-                            String LargestMatch = new String();
-                            int TokenNum = 0;
+                            int finalMax = -1;
+                            String largestStr = "";
+                            String largestMatch = new String();
+                            int tokenNum = 0;
                             //System.out.print(start + " ");
                             for (int k = 0; k < nRegEx; k++) {     /** We are trying to match with every DFA*/
 
-                                String Temp = isAcceped(k, string[i].substring(start));
-                               // System.out.println(k + " " + start + " " + Temp);
+                                String temp = isAcceped(k, string[i].substring(start));
 
-                                if(ErrorDetected==true) {
+                                if(errorDetected==true) {
                                     System.out.println("An Error Detected: " + string[i].substring(start) + " is Unrecognized!");
                                     start++;
                                 }
-                                if (LargestMatch.length() < Temp.length()) LargestMatch = Temp; /** We want largest match */
+                                if (largestMatch.length() < temp.length()) largestMatch = temp; /** We want largest match */
 
                                 /** When we get the largest match then we move our string position to start + FinalMax*/
-                                if(FinalMax<LargestMatch.length()) {
-                                    FinalMax = LargestMatch.length();
-                                    fin = start+FinalMax;
-                                    LargestStr = Temp;
-                                    TokenNum = k;
+                                if(finalMax<largestMatch.length()) {
+                                    finalMax = largestMatch.length();
+                                    fin = start+finalMax;
+                                    largestStr = temp;
+                                    tokenNum = k;
 
                                 }
                             }
-                            if(ErrorDetected==true){
-                                ErrorDetected = false;
+                            if(errorDetected==true){
+                                errorDetected = false;
                                 break;
                             }
-                            if(!LargestStr.equals(""))
-                            System.out.println(LargestStr + " Token "  + (TokenNum+1));
+                            if(!largestStr.equals(""))
+                            System.out.println(largestStr + " Token "  + (tokenNum+1));
                             start = fin;
+                            if(start == fin && start!=string[i].length()){
+                                System.out.println("No match found!");
+                                break;
+                            }
                         }
-
                     }
         }
         scanIn.close();
