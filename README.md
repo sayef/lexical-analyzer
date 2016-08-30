@@ -8,16 +8,26 @@
 5. Now check the longest sequence accepted by the DFAs.
     That's all about algorithm.
 
-###How to run my code: 
+###How to run the application: 
 1. In the Assignment_1.pdf, there is given what to do at a glance.
-2. Add my 2 sources to your project.
-3. There is a file input.l where actually the regular expression are written. 
+2. Add the sources to your project.
+3. There is a file input.l where actually the regular expressions (regex) are written. 
     (there is a absolute path for the file in the code, change it for your own use)
-4. Our program will analyze them and will take input from console to test whether your 
-    given string matches any regular expression
-5. Initially we handled only two characters 'a' and 'b', but you can convert it easily for any characters 
-    (see comments to understand easily)
+4. This application will analyze them and will take input from console to test whether your 
+    given string matches any regular expressions.
+5. Characters A-Z, a-z and 0-9 are supported as string literals.
+6. Supported regex symbols are, '|', '?', '+', '*', [a-zPQR] etc. '(', ')' encloure.
 
+###Example of regular expressions:
+1. [a-b]?at
+2. ab*c?
+3. Ab+Cd+
+4. a?
+5. (ab*)|c
+6. abb
+7. (a*|b*)*abba
+8. (a*|b+)a
+9. (a*b+)a
 
 ###Example strings as input:
     (not regular expressions; regular expressions are given in input.l; 
@@ -25,3 +35,6 @@
 1. aab
 2. abab
 3. aabbb
+4. bat
+5. AbCd
+6. AbbCddddd
